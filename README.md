@@ -2,6 +2,8 @@
 
 Aplicação pessoal de alimentação, hidratação e treino, em português, com interface verde, creme e sálvia. Feita com React 19, TypeScript e Vite. A primeira versão funciona no navegador, sem conta ou backend.
 
+**Site publicado:** https://health-control-eight.vercel.app
+
 ## Executar
 
 ### Abrir a aplicação
@@ -37,9 +39,11 @@ Os testes de navegador usam o Chromium em `/usr/bin/chromium`, se disponível. E
 
 O repositório inclui `vercel.json` com o framework Vite, instalação pelo lockfile, comando `npm run build:web` e saída em `dist`. A versão portátil não é necessária para hospedar o site.
 
-Para conectar sua própria conta, abra https://vercel.com/new, importe `Inwtn/Health-Control` do GitHub, mantenha a raiz do projeto e selecione Node.js 24.x nas configurações se houver escolha de versão. A configuração de build já está no repositório. Autorize o acesso ao repositório pela integração oficial da Vercel e conclua o deploy. Nenhum segredo de aplicação é necessário para esta versão.
+O projeto existente na Vercel é `inwtn/health-control`, publicado em https://health-control-eight.vercel.app. A produção permite acesso público; as prévias de outras branches mantêm a autenticação da Vercel. Nenhum segredo de aplicação é necessário para esta versão.
 
-Depois da conexão, a Vercel gera um endereço HTTPS. Envios à branch de produção configurada atualizam o site; outras branches podem gerar prévias. O endereço real só deve ser informado depois de um deploy confirmado, sem presumir que um nome `*.vercel.app` esteja disponível. A publicação do ambiente Codex não publica o site.
+Para ativar as atualizações pelo GitHub, instale o aplicativo oficial https://github.com/apps/vercel na conta `Inwtn`, concedendo acesso ao repositório `Health-Control`, e conecte esse repositório ao projeto Vercel existente. Com a integração conectada, envios à branch `main` atualizam o site; outras branches podem gerar prévias. A publicação do ambiente Codex é separada da publicação do site.
+
+Use o endereço estável de produção para manter os registros no mesmo navegador. Os endereços individuais de cada deployment possuem origens diferentes e não compartilham automaticamente o `localStorage`.
 
 Se a publicação for executada por CLI dentro do ambiente em nuvem, o acesso à API `api.vercel.com` e a autenticação da sua conta precisam estar disponíveis. Faça login pelo fluxo oficial da Vercel ou configure as credenciais nas configurações seguras do ambiente, nunca no código ou no chat. A importação pelo navegador da sua conta permite conectar GitHub e Vercel sem armazenar um token neste projeto.
 
@@ -68,7 +72,7 @@ Os dados alimentares vêm da TACO, NEPA/UNICAMP, 4ª edição (2011), digitaliza
 
 Tudo é salvo em `localStorage`, na chave `health-control:v1`. Não há sincronização entre dispositivos. Limpar o navegador remove os registros. O JSON exportado contém dados pessoais; a importação ainda não está implementada. Use dados fictícios em dispositivos compartilhados e nos testes.
 
-Para transformar esta versão em um serviço com múltiplos usuários, serão necessários autenticação, backend, armazenamento seguro, consentimento e política de privacidade, além de revisão profissional das recomendações. Não há publicação ou implantação automática.
+Para transformar esta versão em um serviço com múltiplos usuários, serão necessários autenticação, backend, armazenamento seguro, consentimento e política de privacidade, além de revisão profissional das recomendações. A hospedagem do site estático não adiciona sincronização dos dados pessoais.
 
 ## Estrutura
 
