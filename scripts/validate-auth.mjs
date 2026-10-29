@@ -111,6 +111,20 @@ export async function validateAuth() {
     });
     if (!response.ok) throw new Error("auth_settings_failed");
     const settings = await response.json();
+    if (settings.mailer_autoconfirm) {
+      const signupClient = createClient(url, publicKey, options);
+      const signup = await signupClient.auth.signUp({
+        email: `hc-signup-${randomUUID()}@example.com`,
+        password: randomBytes(32).toString("base64url"),
+      });
+      if (signup.data?.user?.id) created.push(signup.data.user.id);
+      check(signup, Boolean(signup.data?.session));
+      check(await signupClient.auth.signOut());
+      console.log(
+        "Public signup with immediate session passed (email confirmation disabled).",
+      );
+    }
+
     console.log(
       "Real Auth login/logout and REST isolation checks passed for two temporary accounts.",
     );
