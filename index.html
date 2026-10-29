@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#194e3b" />
+    <meta
+      name="description"
+      content="Seu espaço para cuidar da alimentação, acompanhar a água e organizar os treinos. Um passo de cada vez."
+    />
+    <title>Health Control · Seu bem-estar, todos os dias</title>
+    <link rel="icon" type="image/svg+xml" href="/src/assets/favicon.svg?inline" />
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (
+          location.protocol === "file:" &&
+          document.querySelector('script[src$="/src/main.tsx"]')
+        ) {
+          location.replace(new URL("./portable/index.html", location.href));
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

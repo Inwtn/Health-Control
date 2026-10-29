@@ -1,0 +1,6 @@
+node_modules
+portable
+test-results
+playwright-report
+tests
+.env*
