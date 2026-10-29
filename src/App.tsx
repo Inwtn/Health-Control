@@ -9,6 +9,7 @@ import {
   Dumbbell,
   Heart,
   LayoutDashboard,
+  LogOut,
   Leaf,
   Menu,
   Plus,
@@ -20,6 +21,9 @@ import {
 } from "lucide-react";
 import { HealthProvider, useHealth } from "./store";
 import type { Food, MealName } from "./lib/types";
+import { AuthProvider, useAuth } from "./auth/AuthProvider";
+import { AuthPage } from "./auth/AuthPage";
+import { supabase } from "./lib/supabase";
 import { dateKey } from "./lib/health";
 import { ProfileForm } from "./components/ProfileForm";
 import { FoodModal } from "./components/FoodModal";
@@ -39,7 +43,28 @@ const navigation = [
   { key: "workouts", title: "Meus treinos", icon: Dumbbell },
 ];
 function Shell() {
-  const { state, notice, storageError } = useHealth();
+  const { state, notice, storageError, syncStatus, retrySave, unsaved } =
+    useHealth();
+  const { session } = useAuth();
+  const [authOpen, setAuthOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+  const [logoutConfirm, setLogoutConfirm] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
+  const signOut = async () => {
+    setSigningOut(true);
+    setLogoutError("");
+    try {
+      const { error } = await supabase!.auth.signOut({ scope: "local" });
+      if (error)
+        setLogoutError(
+          "Não foi possível sair. Verifique sua conexão e tente novamente.",
+        );
+    } catch {
+      setLogoutError("Não foi possível sair. Tente novamente.");
+    } finally {
+      setSigningOut(false);
+    }
+  };
   const [page, setPage] = useState("overview");
   const [mobile, setMobile] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -66,6 +91,7 @@ function Shell() {
     day: "numeric",
     month: "long",
   });
+  if (authOpen) return <AuthPage onBack={() => setAuthOpen(false)} />;
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">
@@ -129,6 +155,23 @@ function Shell() {
           <Leaf className="quote-leaf" size={76} strokeWidth={0.7} />
         </div>
         <div className="sidebar-bottom">
+          {session ? (
+            <button
+              className="nav-item"
+              disabled={signingOut}
+              onClick={() =>
+                unsaved ? setLogoutConfirm(true) : void signOut()
+              }
+            >
+              <LogOut size={19} />
+              <span>{signingOut ? "Saindo…" : "Sair da conta"}</span>
+            </button>
+          ) : (
+            <button className="nav-item" onClick={() => setAuthOpen(true)}>
+              <UserRound size={19} />
+              <span>Entrar ou criar conta</span>
+            </button>
+          )}
           <button
             className={`nav-item ${page === "profile" ? "active" : ""}`}
             onClick={() => navigate("profile")}
@@ -173,7 +216,7 @@ function Shell() {
           <div className="topbar-right">
             <span className="private-label">
               <ShieldCheck size={15} />
-              Seu espaço pessoal
+              {syncStatus ?? "Seu espaço pessoal"}
             </span>
             <button
               className="topbar-avatar"
@@ -212,9 +255,19 @@ function Shell() {
               </button>
             </div>
           </div>
+          {logoutError && (
+            <p role="alert" className="storage-error">
+              {logoutError}
+            </p>
+          )}
           {storageError && (
             <div className="storage-error" role="alert">
               {storageError}
+              {retrySave && (
+                <button className="button secondary" onClick={retrySave}>
+                  Tentar salvar novamente
+                </button>
+              )}
             </div>
           )}
           {page === "overview" && (
@@ -252,6 +305,36 @@ function Shell() {
           </footer>
         </main>
       </div>
+      {logoutConfirm && (
+        <Modal
+          title="Sair com alterações não salvas?"
+          subtitle="Alguns registros ainda não foram enviados à sua conta."
+          onClose={() => setLogoutConfirm(false)}
+        >
+          <div className="form-content">
+            <p>
+              Você pode cancelar e aguardar o salvamento ou exportar uma cópia
+              em Meu perfil. Sair agora descarta as alterações que ainda não
+              foram salvas.
+            </p>
+          </div>
+          <div className="modal-actions">
+            <button
+              className="button secondary"
+              onClick={() => setLogoutConfirm(false)}
+            >
+              Continuar aqui
+            </button>
+            <button
+              className="button danger-button"
+              disabled={signingOut}
+              onClick={() => void signOut()}
+            >
+              Sair mesmo assim
+            </button>
+          </div>
+        </Modal>
+      )}
       {profileOpen && <ProfileForm onClose={() => setProfileOpen(false)} />}{" "}
       {adding && (
         <FoodModal
@@ -327,10 +410,34 @@ function Shell() {
     </div>
   );
 }
-export default function App() {
+function AccountGate() {
+  const { session, loading, error, recovery } = useAuth();
+  if (loading)
+    return (
+      <main className="auth-loading" role="status">
+        Preparando seu espaço…
+      </main>
+    );
+  if (error)
+    return (
+      <main className="auth-loading">
+        <h1>Não foi possível verificar seu acesso.</h1>
+        <button className="button" onClick={() => window.location.reload()}>
+          Tentar novamente
+        </button>
+      </main>
+    );
+  if (supabase && (!session || recovery)) return <AuthPage />;
   return (
-    <HealthProvider>
+    <HealthProvider key={session?.user.id ?? "local"}>
       <Shell />
     </HealthProvider>
+  );
+}
+export default function App() {
+  return (
+    <AuthProvider>
+      <AccountGate />
+    </AuthProvider>
   );
 }

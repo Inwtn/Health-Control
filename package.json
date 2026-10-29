@@ -11,11 +11,15 @@
     "build:portable": "tsc -b && vite build --mode portable",
     "preview": "vite preview --host 0.0.0.0",
     "test": "node --experimental-strip-types --test src/lib/*.test.ts",
-    "test:e2e": "npm run build:portable && playwright test"
+    "test:e2e": "npm run build:portable && playwright test",
+    "test:auth": "playwright test --config playwright.auth.config.ts",
+    "db:migrate": "node scripts/migrate.mjs"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.3.0",
+    "@supabase/supabase-js": "^2.118.0",
     "lucide-react": "^0.468.0",
+    "pg": "^8.23.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

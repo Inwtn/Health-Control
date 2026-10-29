@@ -7,12 +7,15 @@ import {
   Trash2,
   UserRound,
 } from "lucide-react";
+import { useAuth } from "../auth/AuthProvider";
 import { emptyState, useHealth } from "../store";
 import { activityLevels, goalNames } from "../lib/health";
 import { Modal, Note, number } from "../components/ui";
 
 export function Profile({ onEdit }: { onEdit: () => void }) {
-  const { state, reset, notify, exportJson } = useHealth();
+  const { state, reset, notify, exportJson, importLegacy } = useHealth();
+  const { session } = useAuth();
+  const [confirmImport, setConfirmImport] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const p = state.profile;
   function exportData() {
@@ -78,18 +81,38 @@ export function Profile({ onEdit }: { onEdit: () => void }) {
         <span className="round-icon">
           <ShieldCheck size={25} />
         </span>
-        <h2>Seus dados ficam com você.</h2>
+        <h2>
+          {session
+            ? "Sua conta, seus registros."
+            : "Seus dados ficam com você."}
+        </h2>
         <p>
-          Esta primeira versão salva suas informações apenas neste navegador.
-          Não há conta, sincronização com outros dispositivos ou envio dos
-          registros a um servidor. Limpar os dados do navegador também remove
-          seus registros.
+          {session ? (
+            <>
+              Você está conectado como{" "}
+              <strong className="account-email">{session.user.email}</strong>.
+              Seu perfil, alimentação, água e treinos são armazenados no
+              Supabase e vinculados à sua conta. Aguarde a indicação de
+              salvamento antes de fechar a página. Em dispositivos
+              compartilhados, saia da conta quando terminar.
+            </>
+          ) : (
+            "Suas informações são salvas apenas neste navegador. Limpar os dados do navegador remove esses registros. O acesso por conta será disponibilizado quando a conexão estiver pronta."
+          )}
         </p>
         <p>
           A exportação contém informações pessoais e de saúde. Guarde-a com
           cuidado, especialmente em um dispositivo compartilhado.
         </p>
         <div className="privacy-actions">
+          {importLegacy && (
+            <button
+              className="button secondary"
+              onClick={() => setConfirmImport(true)}
+            >
+              Importar registros da versão anterior
+            </button>
+          )}
           <button className="button secondary" onClick={exportData}>
             <Download size={17} />
             Exportar meus dados
@@ -105,13 +128,49 @@ export function Profile({ onEdit }: { onEdit: () => void }) {
       </section>
       <Note>
         <LockKeyhole size={15} />
-        Um futuro cadastro com login e sincronização precisará de armazenamento
-        seguro, consentimento e controles de acesso. A versão atual é pessoal e
-        local.
+        {session
+          ? "Excluir os registros remove seu perfil e seu histórico de saúde da conta após o salvamento. Seu acesso por e-mail e senha é mantido. A exportação inclui os registros de saúde, sem a senha."
+          : "Os registros locais não são enviados automaticamente a uma conta. Você poderá escolher importá-los após entrar."}
       </Note>
+      {confirmImport && (
+        <Modal
+          title="Importar registros deste navegador?"
+          subtitle="Faça isso somente se os registros da versão anterior são seus."
+          onClose={() => setConfirmImport(false)}
+        >
+          <div className="form-content">
+            <p>
+              Os registros locais serão copiados para a conta{" "}
+              {session?.user.email}. A importação requer uma conta sem registros
+              e preserva a cópia antiga neste navegador.
+            </p>
+          </div>
+          <div className="modal-actions">
+            <button
+              className="button secondary"
+              onClick={() => setConfirmImport(false)}
+            >
+              Cancelar
+            </button>
+            <button
+              className="button"
+              onClick={() => {
+                importLegacy?.();
+                setConfirmImport(false);
+              }}
+            >
+              Importar meus registros
+            </button>
+          </div>
+        </Modal>
+      )}
       {confirm && (
         <Modal
-          title="Excluir seus dados deste navegador?"
+          title={
+            session
+              ? "Excluir seus registros da conta?"
+              : "Excluir seus dados deste navegador?"
+          }
           subtitle="Esta ação não pode ser desfeita."
           onClose={() => setConfirm(false)}
         >
