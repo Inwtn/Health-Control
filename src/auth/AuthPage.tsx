@@ -12,7 +12,7 @@ import {
   LockKeyhole,
   Utensils,
 } from "lucide-react";
-import { authMessage, supabase } from "../lib/supabase";
+import { authMessage, emailDeliveryEnabled, supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
 
 type Mode = "login" | "signup" | "forgot";
@@ -282,7 +282,7 @@ export function AuthPage({ onBack }: { onBack?: () => void }) {
                 </label>
               </>
             )}
-            {!signup && !forgot && !recovery && (
+            {emailDeliveryEnabled && !signup && !forgot && !recovery && (
               <button
                 type="button"
                 className="auth-forgot"
@@ -334,6 +334,12 @@ export function AuthPage({ onBack }: { onBack?: () => void }) {
               <ArrowRight size={17} />
             </button>
           </form>
+          {!emailDeliveryEnabled && (
+            <p className="auth-privacy">
+              A recuperação por e-mail ainda não está disponível. Guarde sua
+              senha em um local seguro.
+            </p>
+          )}
           <p className="auth-privacy">
             <LockKeyhole size={13} /> Seus registros são vinculados à sua conta
             e protegidos por controles de acesso. As recomendações são

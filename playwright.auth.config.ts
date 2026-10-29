@@ -14,6 +14,7 @@ export default defineConfig({
       VITE_SUPABASE_URL: "https://accounts.example.test",
       VITE_SUPABASE_ANON_KEY: "public-test-key",
       VITE_SUPABASE_PUBLISHABLE_KEY: "public-test-key",
+      VITE_AUTH_EMAIL_ENABLED: "true",
     },
   },
 });

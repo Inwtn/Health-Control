@@ -34,3 +34,7 @@ export function authMessage(code?: string) {
       return "Não foi possível concluir. Verifique sua conexão e tente novamente.";
   }
 }
+
+// Enable only after a working SMTP sender and redirect URLs have been configured.
+export const emailDeliveryEnabled =
+  import.meta.env.VITE_AUTH_EMAIL_ENABLED === "true";
